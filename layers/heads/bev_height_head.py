@@ -1,11 +1,12 @@
 """Inherited from `https://github.com/open-mmlab/mmdetection3d/blob/master/mmdet3d/models/dense_heads/centerpoint_head.py`"""  # noqa
 import torch
-from mmdet3d.core import draw_heatmap_gaussian, gaussian_radius
+from mmdet3d.models.utils import draw_heatmap_gaussian, gaussian_radius
 from mmdet3d.models.dense_heads.centerpoint_head import CenterHead
 from mmdet3d.models.utils import clip_sigmoid
-from mmdet.core import reduce_mean
-from mmdet.models import build_backbone
-from mmdet3d.models import build_neck
+from mmdet.utils import reduce_mean
+from mmdet.registry import MODELS
+# from mmdet.models import build_backbone
+# from mmdet3d.models import build_neck
 from torch.cuda.amp import autocast
 
 __all__ = ['BEVHeightHead']
@@ -72,9 +73,11 @@ class BEVHeightHead(CenterHead):
             loss_bbox=loss_bbox,
             separate_head=separate_head,
         )
-        self.trunk = build_backbone(bev_backbone_conf)
+        self.trunk = MODELS.build(bev_backbone_conf)
+        # build_backbone(bev_backbone_conf)
         self.trunk.init_weights()
-        self.neck = build_neck(bev_neck_conf)
+        self.neck = MODELS.build(bev_neck_conf)
+        # build_neck(bev_neck_conf)
         self.neck.init_weights()
         del self.trunk.maxpool
         self.gaussian_overlap = gaussian_overlap
