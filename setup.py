@@ -61,8 +61,9 @@ setup(
         make_cuda_ext(
             name='voxel_pooling_ext',
             module='ops.voxel_pooling',
-            sources=['src/voxel_pooling_forward.cpp'],
-            sources_cuda=['src/voxel_pooling_forward_cuda.cu'],
+            sources=['src/voxel_pooling_forward.cpp',
+                     'src/voxel_pooling_forward_cuda.cu'],
+            # sources_cuda=['src/voxel_pooling_forward_cuda.cu'],
         ),
     ],
     cmdclass={'build_ext': BuildExtension},

@@ -31,6 +31,19 @@
             ],
             "console": "integratedTerminal"
             // python [EXP_PATH] --amp_backend native -b 8 --gpus 8
+        },{
+            "name": "trans dair-v2x",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/data_converter/dair2kitti.py",
+            "args": [
+                "--source-root",
+                "data/dair-v2x-i",
+                "--target-root",
+                "data/dair-v2x-i-kitti",
+            ],
+            "console": "integratedTerminal"
         }
+        // python scripts/data_converter/dair2kitti.py --source-root data/dair-v2x-i --target-root data/dair-v2x-i-kitti
     ]
 }
