@@ -25,11 +25,12 @@
                 "--amp_backend",
                 "native",
                 "-b",
-                "8",
+                "2",
                 "--gpus",
-                "8"
+                "1"
             ],
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false
             // python [EXP_PATH] --amp_backend native -b 8 --gpus 8
         },{
             "name": "trans dair-v2x",

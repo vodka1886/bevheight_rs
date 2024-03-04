@@ -4,6 +4,7 @@ import cv2
 
 import random
 import mmcv
+import mmengine
 import numpy as np
 import torch
 from mmdet3d.structures.bbox_3d.lidar_box3d import LiDARInstance3DBoxes
@@ -93,7 +94,7 @@ def img_intrin_extrin_transform(img, ratio, roll, transform_pitch, intrin_mat):
 
     W, H = img.size[0], img.size[1]
     new_W, new_H = (int(W * ratio), int(H * ratio))
-    img = img.resize((new_W, new_H), Image.ANTIALIAS)
+    img = img.resize((new_W, new_H), Image.LANCZOS)
     
     h_min = int(center[1] * abs(1.0 - ratio))
     w_min = int(center[0] * abs(1.0 - ratio))
@@ -243,7 +244,7 @@ class NuscMVDetDataset(Dataset):
                 default: list().
         """
         super().__init__()
-        self.infos = mmcv.load(info_path)
+        self.infos = mmengine.load(info_path)
         self.is_train = is_train
         self.ida_aug_conf = ida_aug_conf
         self.data_root = data_root

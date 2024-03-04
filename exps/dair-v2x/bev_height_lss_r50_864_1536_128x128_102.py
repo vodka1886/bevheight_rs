@@ -3,6 +3,7 @@ from argparse import ArgumentParser, Namespace
 
 import os
 import mmcv
+import mmengine
 import pytorch_lightning as pl
 import torch
 import torch.nn.parallel
@@ -162,8 +163,8 @@ head_conf = {
     'train_cfg': train_cfg,
     'test_cfg': test_cfg,
     'in_channels': 256,  # Equal to bev_neck output_channels.
-    'loss_cls': dict(type='GaussianFocalLoss', reduction='mean'),
-    'loss_bbox': dict(type='L1Loss', reduction='mean', loss_weight=0.25),
+    'loss_cls': dict(type='mmdet.GaussianFocalLoss', reduction='mean'),
+    'loss_bbox': dict(type='mmdet.L1Loss', reduction='mean', loss_weight=0.25),
     'gaussian_overlap': 0.1,
     'min_radius': 2,
 }
@@ -196,7 +197,7 @@ class BEVHeightLightningModel(LightningModule):
         self.backbone_conf = backbone_conf
         self.head_conf = head_conf
         self.ida_aug_conf = ida_aug_conf
-        mmcv.mkdir_or_exist(default_root_dir)
+        mmengine.mkdir_or_exist(default_root_dir)
         self.default_root_dir = default_root_dir
         self.evaluator = RoadSideEvaluator(class_names=self.class_names,
                                            current_classes=["Car", "Pedestrian", "Cyclist"],
@@ -224,6 +225,7 @@ class BEVHeightLightningModel(LightningModule):
             for key, value in mats.items():
                 mats[key] = value.cuda()
             sweep_imgs = sweep_imgs.cuda()
+            
             gt_boxes = [gt_box.cuda() for gt_box in gt_boxes]
             gt_labels = [gt_label.cuda() for gt_label in gt_labels]
         preds = self(sweep_imgs, mats)
@@ -397,7 +399,7 @@ def run_cli():
         profiler='simple',
         deterministic=False,
         max_epochs=100,
-        accelerator='ddp',
+        accelerator='cuda',
         num_sanity_val_steps=0,
         gradient_clip_val=5,
         limit_val_batches=0,

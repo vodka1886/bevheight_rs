@@ -1,7 +1,9 @@
 from torch import nn
-
+import numpy as np
 from layers.backbones.lss_fpn import LSSFPN
 from layers.heads.bev_height_head import BEVHeightHead
+from mmengine.structures import InstanceData
+from mmdet3d.structures.bbox_3d.lidar_box3d import LiDARInstance3DBoxes
 
 __all__ = ['BEVHeight']
 
@@ -81,7 +83,16 @@ class BEVHeight(nn.Module):
                 - list[torch.Tensor]: Masks indicating which boxes \
                     are valid.
         """
-        return self.head.get_targets(gt_boxes, gt_labels)
+        batch_gt_instance_3d = []
+        for gt_box,label in zip(gt_boxes,gt_labels) :
+            gt_instances_3d = InstanceData()
+            gt_instances_3d["bboxes_3d"]=LiDARInstance3DBoxes(
+            np.array(
+                [[8.7314, -1.8559, -1.5997, 1.2000, 0.4800, 1.8900,
+                  -1.5808]]))
+            gt_instances_3d["labels_3d"]=np.array([1])
+            batch_gt_instance_3d.append(gt_instances_3d)
+        return self.head.get_targets(batch_gt_instance_3d)
 
     def loss(self, targets, preds_dicts):
         """Loss function for BEVHeight.

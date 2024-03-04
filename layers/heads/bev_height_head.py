@@ -5,6 +5,7 @@ from mmdet3d.models.dense_heads.centerpoint_head import CenterHead
 from mmdet3d.models.utils import clip_sigmoid
 from mmdet.utils import reduce_mean
 from mmdet.registry import MODELS
+import mmdet3d.registry as REG3D
 # from mmdet.models import build_backbone
 # from mmdet3d.models import build_neck
 from torch.cuda.amp import autocast
@@ -76,7 +77,7 @@ class BEVHeightHead(CenterHead):
         self.trunk = MODELS.build(bev_backbone_conf)
         # build_backbone(bev_backbone_conf)
         self.trunk.init_weights()
-        self.neck = MODELS.build(bev_neck_conf)
+        self.neck = REG3D.MODELS.build(bev_neck_conf)
         # build_neck(bev_neck_conf)
         self.neck.init_weights()
         del self.trunk.maxpool
@@ -113,7 +114,7 @@ class BEVHeightHead(CenterHead):
         ret_values = super().forward(fpn_output)
         return ret_values
 
-    def get_targets_single(self, gt_bboxes_3d, gt_labels_3d):
+    def get_targets_single(self, gt_instances_3d):
         """Generate training targets for a single sample.
 
         Args:
@@ -131,6 +132,8 @@ class BEVHeightHead(CenterHead):
                 - list[torch.Tensor]: Masks indicating which boxes \
                     are valid.
         """
+        gt_bboxes_3d = gt_instances_3d["bboxes_3d"].tensor
+        gt_labels_3d = torch.tensor(gt_instances_3d["labels_3d"])
         max_objs = self.train_cfg['max_objs'] * self.train_cfg['dense_reg']
         grid_size = torch.tensor(self.train_cfg['grid_size'])
         pc_range = torch.tensor(self.train_cfg['point_cloud_range'])
@@ -234,19 +237,21 @@ class BEVHeightHead(CenterHead):
                     ind[new_idx] = y * feature_map_size[0] + x
                     mask[new_idx] = 1
                     # TODO: support other outdoor dataset
-                    vx, vy = task_boxes[idx][k][7:]
+                    # vx, vy = task_boxes[idx][k][7:]
+                    vx = torch.tensor(0).cuda()
+                    vy = torch.tensor(0).cuda()
                     rot = task_boxes[idx][k][6]
                     box_dim = task_boxes[idx][k][3:6]
                     if self.norm_bbox:
                         box_dim = box_dim.log()
                     anno_box[new_idx] = torch.cat([
                         center - torch.tensor([x, y], device='cuda'),
-                        z.unsqueeze(0),
-                        box_dim,
-                        torch.sin(rot).unsqueeze(0),
-                        torch.cos(rot).unsqueeze(0),
-                        vx.unsqueeze(0),
-                        vy.unsqueeze(0),
+                        z.unsqueeze(0).cuda(),
+                        box_dim.cuda(),
+                        torch.sin(rot).unsqueeze(0).cuda(),
+                        torch.cos(rot).unsqueeze(0).cuda(),
+                        vx.unsqueeze(0).cuda(),
+                        vy.unsqueeze(0).cuda(),
                     ])
 
             heatmaps.append(heatmap)

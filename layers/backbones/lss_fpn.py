@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from mmcv.cnn import build_conv_layer
-# from mmdet3d.models import MODELS
+import mmdet3d.registry as REG3D
 from mmdet.registry import MODELS
 # from mmdet3d.models import build_neck
 # from mmdet.models import build_backbone
@@ -295,7 +295,7 @@ class LSSFPN(nn.Module):
 
         self.img_backbone = MODELS.build(img_backbone_conf) 
         # build_backbone(img_backbone_conf)
-        self.img_neck = MODELS.build(img_neck_conf) 
+        self.img_neck = REG3D.MODELS.build(img_neck_conf) 
         # build_neck(img_neck_conf)
         self.height_net = self._configure_height_net(height_net_conf)
 
